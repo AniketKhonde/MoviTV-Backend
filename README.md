@@ -28,9 +28,9 @@ Movitv is a web application for discovering and bookmarking your favorite TV ser
 
 ## Setup Instructions
 
-1. Clone the repository: `git clone https://github.com/AniketKhonde/MoviTV-frontend.git`
+1. Clone the repository: `git clone https://github.com/AniketKhonde/MoviTV-Backend.git`
 2. Navigate to the project directory: `cd movitv`
-3. Install dependencies for the frontend: `cd frontend && npm install`
+3. Install dependencies for the frontend: `cd backend && npm install`
 4. Install dependencies for the backend: `cd .. && cd backend && npm install`
 5. Start the backend server: `npm start` in the `backend` directory
 6. Start the frontend development server: `npm start` in the `frontend` directory
