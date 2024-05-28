@@ -1,4 +1,4 @@
-# Movitv (Backend Codebase)
+# MoviTV (Backend Codebase)
 
 Movitv is a web application for discovering and bookmarking your favorite TV series. With Movitv, you can explore a vast collection of TV series, read summaries, view ratings, and bookmark your favorite shows for easy access.
 
