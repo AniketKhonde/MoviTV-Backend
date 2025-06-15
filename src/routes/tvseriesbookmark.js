@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { addBookmark, showBookmarks, removeBookmark } = require('../controllers/tvseriesbookmarkController');
+const { addBookmark, showBookmarks, removeBookmark } = require('../controllers/tvseriesbookmarkcontroller');
 
 
 // Route to add a TV series bookmark
