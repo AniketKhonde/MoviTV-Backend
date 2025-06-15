@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const User = require('./user'); // Import user schema
 
 const profileSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: String, required: true }, // Changed from ObjectId to String
   email: { type: String, ref: 'User' },// Assuming email is a string
   fullName: { type: String, required: false },
   dateOfBirth: { type: Date, default: null }, // Set default value to null for optional field

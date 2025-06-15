@@ -12,14 +12,12 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ error: "Email already registered" });
         }
 
-        // Hash the password
-        // const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Create a new user
+        // Create a new user with plain text password
         const newUser = new User({
             username,
             email,
-            password
+            password, // Store password as plain text
+            loginMethod: 'manual'
         });
 
         // Save the new user to the database
@@ -27,10 +25,11 @@ const registerUser = async (req, res) => {
 
         // Create a profile for the newly registered user
         const newProfile = new Profile({
-            userId: newUser._id, // Assign the user's ObjectId to userId field in profile
-            // You can add other profile fields here if needed
-            username,
-            email
+            userId: newUser._id.toString(), // Convert ObjectId to string
+            email,
+            fullName: username,
+            createdAt: new Date(),
+            updatedAt: new Date()
         });
 
         // Save the profile to the database
@@ -40,12 +39,17 @@ const registerUser = async (req, res) => {
         const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
             expiresIn: "1h" // Token expires in 1 hour
         });
+
         // Respond with success message and token
-        res.status(201).json({ message: "User registered successfully",jwtToken:token , userId: newUser._id });
+        res.status(201).json({ 
+            message: "User registered successfully",
+            jwtToken: token,
+            userId: newUser._id
+        });
     } catch (error) {
         console.error("registration error:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 };
 
-module.exports= {registerUser};
+module.exports = { registerUser };

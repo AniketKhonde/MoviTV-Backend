@@ -9,6 +9,6 @@ router.post('/addmoviebookmark/movie',  addBookmark);
 router.get('/showmoviebookmarks/movies/:userId',  showBookmarks);
 
 // Route to remove a bookmark
-router.delete('/deletemoviebookmark/movie/:id',  removeBookmark);
+router.delete('/deletemoviebookmark/movie/:userId/:id',  removeBookmark);
 
 module.exports = router;

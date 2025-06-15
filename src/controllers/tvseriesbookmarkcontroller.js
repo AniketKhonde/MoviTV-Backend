@@ -1,76 +1,100 @@
-const MovieBookmark = require('../models/tvseriesbookmark');
+const TVSeriesBookmark = require('../models/tvseriesbookmark');
+const mongoose = require('mongoose');
 
-// Controller to handle bookmarking a movie
-const addTVSeriesBookmark = async (req, res) => {
+// Controller to handle bookmarking a TV series
+const addBookmark = async (req, res) => {
     try {
         const { userId, tvSeriesId, tmdbId } = req.body;
 
-        if (!userId || !tvSeriesId || !tmdbId ) {
-            return res.status(400).send('User ID, tvSeriesId, TMDB ID');
+        if (!userId || !tvSeriesId) {
+            return res.status(400).json({ error: 'User ID and TV Series ID are required' });
         }
 
-        // Check if the movie is already bookmarked by the user
-        const existingBookmark = await MovieBookmark.findOne({ user: userId, movie: tvSeriesId });
-        if (existingBookmark) {
-            return res.status(400).send('Movie is already bookmarked');
-        }
+        // Use tmdbId if provided, otherwise use tvSeriesId
+        const finalTvSeriesId = tmdbId || tvSeriesId;
 
-        // Create a new movie bookmark
-        const newMovieBookmark = new MovieBookmark({
-            user: userId,
-            tvSeries: tvSeriesId,
-            tvSeriesId: tmdbId
+        // Check if the TV series is already bookmarked by the user
+        const existingBookmark = await TVSeriesBookmark.findOne({ 
+            user: userId, 
+            tvSeriesId: finalTvSeriesId 
         });
 
-        await newMovieBookmark.save();
-        res.status(201).send('tvseries bookmarked successfully');
+        if (existingBookmark) {
+            return res.status(400).json({ error: 'TV Series is already bookmarked' });
+        }
+
+        // Create a new TV series bookmark
+        const newTVSeriesBookmark = new TVSeriesBookmark({
+            user: userId,
+            tvSeriesId: finalTvSeriesId
+        });
+
+        await newTVSeriesBookmark.save();
+        res.status(201).json({ 
+            message: 'TV Series bookmarked successfully', 
+            bookmark: newTVSeriesBookmark 
+        });
     } catch (error) {
-        console.error('Error bookmarking tvseries:', error);
-        res.status(500).send('Internal server error');
+        console.error('Error bookmarking TV series:', error);
+        if (error.code === 11000) {
+            return res.status(400).json({ error: 'TV Series is already bookmarked' });
+        }
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
-// Controller to handle displaying a user's movie bookmarks
-const showTVSeriesBookmarks = async (req, res) => {
+// Controller to handle displaying a user's TV series bookmarks
+const showBookmarks = async (req, res) => {
     try {
-        const userId = req.params.userId; // Get userId from request parameters
+        const userId = req.params.userId;
 
-        // Fetch all movie bookmarks for the user
-        const bookmarks = await MovieBookmark.find({ user: userId }).populate('tvSeries');
+        // Fetch all TV series bookmarks for the user
+        const bookmarks = await TVSeriesBookmark.find({ user: userId });
 
         res.status(200).json(bookmarks);
     } catch (error) {
-        console.error('Error fetching movie bookmarks:', error);
-        res.status(500).send('Internal server error');
+        console.error('Error fetching TV series bookmarks:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
-// Controller to handle removing a movie bookmark
-const removeTVSeriesBookmark = async (req, res) => {
+// Controller to handle removing a TV series bookmark
+const removeBookmark = async (req, res) => {
     try {
-      const tvSeriesId = req.params.id;
-  
-      if (!tvSeriesId) {
-        return res.status(400).send('tvSeries ID is required');
-      }
-  
-      // Check if the movie bookmark exists
-      const bookmark = await MovieBookmark.findById(tvSeriesId);
-      if (!bookmark) {
-        return res.status(404).send('tvSeries bookmark not found');
-      }
-  
-      // Remove the movie bookmark
-      await MovieBookmark.findByIdAndDelete(tvSeriesId);
-  
-      res.status(200).send('tvSeries bookmark removed successfully');
+        console.log('Request params:', req.params); // Debug log
+        const { userId, id } = req.params;
+
+        if (!userId || !id) {
+            console.log('Missing parameters:', { userId, id }); // Debug log
+            return res.status(400).json({ error: 'User ID and TV Series ID are required' });
+        }
+
+        // Validate if the id is a valid MongoDB ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            console.log('Invalid ObjectId:', id); // Debug log
+            return res.status(400).json({ error: 'Invalid bookmark ID format' });
+        }
+
+        // Find and remove the bookmark using the _id field
+        const result = await TVSeriesBookmark.findOneAndDelete({
+            _id: new mongoose.Types.ObjectId(id),
+            user: userId
+        });
+
+        if (!result) {
+            console.log('Bookmark not found:', { userId, id }); // Debug log
+            return res.status(404).json({ error: 'TV Series bookmark not found' });
+        }
+
+        res.status(200).json({ message: 'TV Series bookmark removed successfully' });
     } catch (error) {
-      console.error('Error removing tvSeries bookmark:', error);
-      res.status(500).send('Internal server error');
+        console.error('Error removing TV series bookmark:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-  };
+};
+
 module.exports = {
-    addTVSeriesBookmark,
-    showTVSeriesBookmarks,
-    removeTVSeriesBookmark
+    addBookmark,
+    showBookmarks,
+    removeBookmark
 };

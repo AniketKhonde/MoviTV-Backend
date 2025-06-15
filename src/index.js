@@ -2,6 +2,9 @@ const express = require("express");
 const middleware = require('./middlewares/middleware');
 const mongoose = require("mongoose");
 require('dotenv').config();
+const session = require('express-session');
+const passport = require('./config/passport');
+const authRoutes = require('./routes/auth');
 const moviesRoutes = require('./routes/movies');
 const tvseriesRoutes = require('./routes/tvseries');
 const trendingmoviesRoutes = require('./routes/trendingmovies');
@@ -19,6 +22,17 @@ const searchRoutes = require('./routes/search')
 
 
 const app = express();
+
+// Session configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Use middleware
 app.use(middleware.parseJson);
@@ -54,6 +68,9 @@ app.use('/api/saveProfile', saveprofileRoutes);
 app.use('/api', moviebookmark);
 app.use('/api', tvseriesbookmark);
 app.use('/api/detailinfo', detailinfo);
+
+// Add auth routes
+app.use('/api/auth', authRoutes);
 
 
 
